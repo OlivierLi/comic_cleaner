@@ -7,16 +7,35 @@ import rarfile
 import zipfile
 import re
 
-# Name: ComicVerifier
-# Author : Olivier Li
-#---------------------------------------------------------------------------------------------------#
-# Scanning your own comic collection for safekeeping is fun.                                        #
-# Corrupted or incomplete archives are not!                                                         #
-# ComicVerifier analyzes you comic library and finds all the broken and incomplete {cbr,cbz} files. #
-#---------------------------------------------------------------------------------------------------#
+def validatePageNames(pageNames,issueNumber,comicPath):
+    previousPageNumber = 0
+    
+    # Go over all the pages
+    for pageName in pageNames:
+                
+        #The issue number might also be in the file names
+        #Remove that so it doesn't show up as the page number
+        pageName = pageName.replace(issueNumber,"AAA",1)
+              
+        match = re.search('\D([0-9]{3})\D', pageName)
+        
+        if match:
+            pageNumber = int(match.group(1))
+        
+            if( (pageNumber - previousPageNumber) > 1 ):
+                print comicPath + " is invalid!"
+                print "page name: " + pageName
+                return False
+            
+            previousPageNumber = pageNumber
+    
+    return True
 
 # TODO move page number validation to a function
 def isCbrValid(comicPath):
+    
+    #Find the number of the issue
+    issueNumber = re.search('\D([0-9]{3})\D', comicPath).group(1)
     
     # If an exception is raised here it's probably an error with the file
     # TODO catch just apropriate exceptions just to be sure.
@@ -25,45 +44,40 @@ def isCbrValid(comicPath):
         pageNames = rf.namelist()
         numberOfFiles = len(pageNames)
     except:
-        print comic + " is invalid!"
+        print comicPath + " is invalid because the archive is corrupted."
         return False
         
     # Assume a comic can't have less than 10 pages
     if(numberOfFiles < 10):
-        print comic + " is invalid!"
+        print comicPath + " is invalid because it has too few pages."
         return False
 
-    previousPageNumber = 0
-
-    # Go over all the pages
-    for pageName in pageNames:
-        pageNumber = re.search('[0-9]{1,3}', pageName)
-        if((int(pageNumber) - previousPageNumber) > 1):
-            print comic + " is invalid!"
-            return False
-        else:
-            previousPageNumber = int(pageNumber)
-        
-    return True
+    #return validatePageNames(pageNames,issueNumber,comicPath)
 
 
 # TODO It's possible that all non-numbered pages are scene garbage. Check that out
 # TODO Find out if nameList() gives all the file names even if they are in folders
         
-def isCbzValid():
+def isCbzValid(comicPath):
+    
+    #Find the number of the issue
+    issueNumber = re.search('\D([0-9]{3})\D', comicPath).group(1)
+    
     try:
         zf = zipfile.ZipFile(comicPath)
-        numberOfFiles = len(zf.namelist())
-        
-        if(numberOfFiles > 0):
-            return True
-        else:
-            print comic + " is invalid!"
-            return False
+        pageNames = zf.namelist()
+        numberOfFiles=len(pageNames)
 
     except:
-        print comic + " is invalid!"
+        print comic + " is invalid because the archive is corrupted."
         return False
+    
+    # Assume a comic can't have less than 10 pages
+    if(numberOfFiles < 10):
+        print comic + " is invalid because it has too few pages."
+        return False
+
+    #return validatePageNames(pageNames,issueNumber,comicPath)
 
 def main():
     if (len(sys.argv) < 2):
