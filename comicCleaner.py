@@ -74,14 +74,7 @@ def main():
         elif fnmatch.fnmatchcase(comic, "*.cbr"):
             if not isCbrValid(comic):
                 comics.remove(comic)
-
-    # Even if the archive is valid the last pages might be missing which is hard to detect without knowing how many pages comics of the series usually have.
-    # If not corrupted then compute the average number of pages for each subdirectory
-    # Then for each directory look at each comic. If the number is 3 pages smaller than the average, notify.
-
-    # TODO Create a list of known ads/unwanted pictures. Then when scanning, check the name of the files for the offending titles
-    # to warn if one of these pages is found in the comics.
-    # TODO Possibly find opencv to find logos which indicate full page ads
+                
 
 if __name__ == "__main__":
         main()
