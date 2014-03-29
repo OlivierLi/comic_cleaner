@@ -7,21 +7,21 @@ import rarfile
 import zipfile
 import re
 
-def isCbrValid(comicPath):
+def is_cbr_valid(comic_path):
        
     # If an exception is raised here it's probably an error with the file
     # TODO catch just apropriate exceptions just to be sure.
     try:
-        rf = rarfile.RarFile(comicPath)
+        rf = rarfile.RarFile(comic_path)
         pageNames = rf.namelist()
         numberOfFiles = len(pageNames)
     except:
-        print(comicPath + " is invalid because the archive is corrupted.")
+        print(comic_path + " is invalid because the archive is corrupted.")
         return False
         
     # Assume a comic can't have less than 10 pages
     if numberOfFiles < 15:
-        print(comicPath + " is invalid because it has too few pages.")
+        print(comic_path + " is invalid because it has too few pages.")
         return False
     
     return True
@@ -29,19 +29,19 @@ def isCbrValid(comicPath):
 # TODO It's possible that all non-numbered pages are scene garbage. Check that out
 # TODO Find out if nameList() gives all the file names even if they are in folders
         
-def isCbzValid(comicPath):
+def is_cbz_valid(comic_path):
     try:
-        zf = zipfile.ZipFile(comicPath)
+        zf = zipfile.ZipFile(comic_path)
         pageNames = zf.namelist()
         numberOfFiles=len(pageNames)
 
     except:
-        print(comicPath + " is invalid because the archive is corrupted.")
+        print(comic_path + " is invalid because the archive is corrupted.")
         return False
     
     # Assume a comic can't have less than 10 pages
     if numberOfFiles < 15:
-        print(comicPath + " is invalid because it has too few pages.")
+        print(comic_path + " is invalid because it has too few pages.")
         return False
     
     return True
@@ -68,11 +68,11 @@ def main():
     # Corrupted comics are removed from the list
     for comic in comics:
         if fnmatch.fnmatchcase(comic, "*.cbz"):
-            if not isCbzValid(comic):
+            if not is_cbz_valid(comic):
                 comics.remove(comic)
                 
         elif fnmatch.fnmatchcase(comic, "*.cbr"):
-            if not isCbrValid(comic):
+            if not is_cbr_valid(comic):
                 comics.remove(comic)
 
 if __name__ == "__main__":
