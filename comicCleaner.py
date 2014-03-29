@@ -13,14 +13,26 @@ def is_cbr_valid(comic_path):
     # TODO catch just apropriate exceptions just to be sure.
     try:
         rf = rarfile.RarFile(comic_path)
-        pageNames = rf.namelist()
-        numberOfFiles = len(pageNames)
+        page_info_list = rf.infolist()
+        
+        number_of_files=0
+        
+        if len(page_info_list) > 0:
+            cover_size = page_info_list[0].file_size
+        
+        #See if each page is a single or double page based on the size
+        for info in page_info_list:
+            if info.file_size < cover_size*1.5:
+                number_of_files +=1
+            else:
+                number_of_files +=2
+        
     except:
         print(comic_path + " is invalid because the archive is corrupted.")
         return False
         
-    # Assume a comic can't have less than 10 pages
-    if numberOfFiles < 15:
+    # Assume a comic can't have less than 15 pages
+    if number_of_files < 15:
         print(comic_path + " is invalid because it has too few pages.")
         return False
     
@@ -32,15 +44,25 @@ def is_cbr_valid(comic_path):
 def is_cbz_valid(comic_path):
     try:
         zf = zipfile.ZipFile(comic_path)
-        pageNames = zf.namelist()
-        numberOfFiles=len(pageNames)
+        page_info_list = zf.infolist()
+        number_of_files=0
+        
+        if len(page_info_list) > 0:
+            cover_size = page_info_list[0].file_size
+        
+        #See if each page is a single or double page based on the size
+        for info in page_info_list:
+            if info.file_size < cover_size*1.5:
+                number_of_files +=1
+            else:
+                number_of_files +=2
 
     except:
         print(comic_path + " is invalid because the archive is corrupted.")
         return False
     
-    # Assume a comic can't have less than 10 pages
-    if numberOfFiles < 15:
+    # Assume a comic can't have less than 15 pages
+    if number_of_files < 15:
         print(comic_path + " is invalid because it has too few pages.")
         return False
     
