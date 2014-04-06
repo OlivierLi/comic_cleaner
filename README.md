@@ -7,6 +7,7 @@ comicCleaner analyzes you comic library and finds all the broken and incomplete 
 
 * Find corrupted files in your library
 * Find comics that have too few pages, which indicates a valid but incomplete scan.
+* Find unwanted pages based on crc and remove them.
 
 ###Disclaimer : 
 ComicCleaner is for use with comics you scanned yourself or acquired by legal means. I do not condone piracy in any way.
