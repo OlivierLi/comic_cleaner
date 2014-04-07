@@ -90,6 +90,7 @@ def is_cbr_valid(comic_path):
         if len(page_info_list) > 0:
             cover_size = page_info_list[0].file_size
         else:
+            print(comic_path + " is invalid because it has no pages.")
             return False
 
         #See if each page is a single or double page based on the size
@@ -104,7 +105,7 @@ def is_cbr_valid(comic_path):
         return False
 
     except rarfile.NotRarFile:
-        print(comic_path + " is not a rar file. Maybe rename its a zip!")
+        print(comic_path + " is not a rar file. Maybe its a zip!")
         return False
 
     # Assume a comic can't have less than 15 pages
@@ -124,6 +125,7 @@ def is_cbz_valid(comic_path):
         if len(page_info_list) > 0:
             cover_size = page_info_list[0].file_size
         else:
+            print(comic_path + " is invalid because it has no pages.")
             return False
 
         #See if each page is a single or double page based on the size
@@ -176,8 +178,7 @@ def main():
         for filename in fnmatch.filter(filenames, '*.cb?'):
             comics.append(os.path.join(root, filename))
 
-    # Loop over all comics and simply find the corrupted ones.
-    # Corrupted comics are removed from the list
+    # Loop over all comics and remove the corrupted ones from the list
     for comic in comics:
         if fnmatch.fnmatchcase(comic, "*.cbz"):
             if not is_cbz_valid(comic):
