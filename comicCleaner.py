@@ -12,13 +12,12 @@ import argparse
 #When a file with this crc is encountered it will be removed from the archive
 banned_crcs = []
 
-#If dry-run is selected then no files will be modified
+#If dry_run is selected then no files will be modified
 dry_run = False
 
 
 #Go over the directory and gather the crcs of the files inside
 def gather_crcs(directory):
-
     if not os.path.isdir(directory) or not os.path.exists(directory):
         print("The ad directory is invalid!")
         sys.exit(-1)
@@ -40,7 +39,6 @@ def gather_crcs(directory):
 #Go over the archive and find out if some of its file are banned
 #If there are banned files remove them from the archive
 def clean_cbr(comic_path):
-
     global banned_crcs
     global dry_run
 
@@ -148,7 +146,6 @@ def is_cbz_valid(comic_path):
 
 
 def main():
-
     #Wether or not to clean the library
     do_clean = False
 
