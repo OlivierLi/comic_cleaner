@@ -38,12 +38,19 @@ def gather_crcs(directory):
 
 #Go over the archive and find out if some of its file are banned
 #If there are banned files remove them from the archive
-def clean_cbr(comic_path):
+def clean_comic(comic_path):
     global banned_crcs
     global dry_run
 
-    rar_file_in = rarfile.RarFile(comic_path)
-    page_info_list = rar_file_in.infolist()
+    if fnmatch.fnmatchcase(comic_path, "*.cbz"):
+        archive = zipfile.ZipFile(comic_path)
+    elif fnmatch.fnmatchcase(comic_path, "*.cbr"):
+        archive = rarfile.RarFile(comic_path)
+    else:
+        print(comic_path + " is in an unsupported format!")
+        return
+
+    page_info_list = archive.infolist()
 
     #The crcs of all the files that have to be removed from the archive
     crcs_to_remove = []
@@ -63,27 +70,40 @@ def clean_cbr(comic_path):
     if len(crcs_to_remove) > 0:
 
         #Create a backup of the file
-        new_path = comic_path.replace("cbr", "bak")
+        new_path = comic_path[0:-3] + "bak"
         shutil.move(comic_path, new_path)
 
         #Recreate the rar file from the new path
-        rar_file_in = rarfile.RarFile(new_path)
-        page_info_list = rar_file_in.infolist()
+        if fnmatch.fnmatchcase(comic_path, "*.cbz"):
+            archive = zipfile.ZipFile(new_path)
+        elif fnmatch.fnmatchcase(comic_path, "*.cbr"):
+            archive = rarfile.RarFile(new_path)
 
-        zip_file_out = zipfile.ZipFile(comic_path.replace("cbr", "cbz"), 'w')
+        page_info_list = archive.infolist()
 
+        #Only the creation of zips is suported
+        zip_file_out = zipfile.ZipFile(comic_path[0:-3] + "cbz", 'w')
+
+        #Only rarfiles have a problem with extracting a directory
         for info in page_info_list:
-            if not info.isdir():
-                buffer = rar_file_in.read(info.filename)
+            if isinstance(info, rarfile.RarInfo) and info.isdir():
+                pass
+            else:
+                buffer = archive.read(info.filename)
                 if info.CRC not in crcs_to_remove:
                     zip_file_out.writestr(info.filename, buffer)
 
 
-def is_cbr_valid(comic_path):
+def is_comic_valid(comic_path):
     # If an exception is raised here it's probably an error with the file
     try:
-        rf = rarfile.RarFile(comic_path)
-        page_info_list = rf.infolist()
+
+        if fnmatch.fnmatchcase(comic_path, "*.cbz"):
+            archive = zipfile.ZipFile(comic_path)
+        elif fnmatch.fnmatchcase(comic_path, "*.cbr"):
+            archive = rarfile.RarFile(comic_path)
+
+        page_info_list = archive.infolist()
 
         number_of_files = 0
 
@@ -100,43 +120,12 @@ def is_cbr_valid(comic_path):
             else:
                 number_of_files += 2
 
-    except (rarfile.RarCRCError, rarfile.BadRarFile):
+    except (zipfile.BadZipfile, rarfile.RarCRCError, rarfile.BadRarFile):
         print(comic_path + " is invalid because the archive is corrupted.")
         return False
 
     except rarfile.NotRarFile:
         print(comic_path + " is not a rar file. Maybe its a zip!")
-        return False
-
-    # Assume a comic can't have less than 15 pages
-    if number_of_files < 15:
-        print(comic_path + " is invalid because it has too few pages.")
-        return False
-
-    return True
-
-
-def is_cbz_valid(comic_path):
-    try:
-        zf = zipfile.ZipFile(comic_path)
-        page_info_list = zf.infolist()
-        number_of_files = 0
-
-        if len(page_info_list) > 0:
-            cover_size = page_info_list[0].file_size
-        else:
-            print(comic_path + " is invalid because it has no pages.")
-            return False
-
-        #See if each page is a single or double page based on the size
-        for info in page_info_list:
-            if info.file_size < cover_size * 1.5:
-                number_of_files += 1
-            else:
-                number_of_files += 2
-
-    except zipfile.BadZipfile:
-        print(comic_path + " is invalid because the archive is corrupted.")
         return False
 
     # Assume a comic can't have less than 15 pages
@@ -154,7 +143,8 @@ def main():
     parser = argparse.ArgumentParser(description="ComicCleaner cleans your comic library for you.")
     parser.add_argument('--directory', help='The location of your library', required=True)
     parser.add_argument('--clean', help='Wether the comics will be cleaned or not', action='store_true')
-    parser.add_argument('--dry_run', help='Inform me that comics contain banned files but don\'t modify anything', action='store_true')
+    parser.add_argument('--dry_run', help='Inform me that comics contain banned files but don\'t modify anything',
+                        action='store_true')
     args = vars(parser.parse_args())
 
     #The library will be cleaned
@@ -180,26 +170,16 @@ def main():
 
     # Loop over all comics and remove the corrupted ones from the list
     for comic in comics:
-        if fnmatch.fnmatchcase(comic, "*.cbz"):
-            if not is_cbz_valid(comic):
-                comics.remove(comic)
-
-        elif fnmatch.fnmatchcase(comic, "*.cbr"):
-            if not is_cbr_valid(comic):
-                comics.remove(comic)
+        if not is_comic_valid(comic):
+            comics.remove(comic)
 
     #There is no cleaning up to, bail out
-    if not do_clean and not dry_run:
+    if not do_clean:
         return
 
     #Now that invalid archive are excluded we can proceed with cleaning them
     for comic in comics:
-        if fnmatch.fnmatchcase(comic, "*.cbz"):
-            #TODO add cleaning function for cbzs
-            pass
-
-        elif fnmatch.fnmatchcase(comic, "*.cbr"):
-            clean_cbr(comic)
+        clean_comic(comic)
 
 
 if __name__ == "__main__":
