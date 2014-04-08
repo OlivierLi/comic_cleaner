@@ -141,11 +141,17 @@ def main():
     do_clean = False
 
     parser = argparse.ArgumentParser(description="ComicCleaner cleans your comic library for you.")
-    parser.add_argument('--directory', help='The location of your library', required=True)
-    parser.add_argument('--clean', help='Wether the comics will be cleaned or not', action='store_true')
-    parser.add_argument('--dry_run', help='Inform me that comics contain banned files but don\'t modify anything',
-                        action='store_true')
+    parser.add_argument('library_path', help='The location of your library')
+
+    parser.add_argument('--clean', help='Remove banned files from the comics', action='store_true')
+    parser.add_argument('--banned_files_dir', help='The directory contaning the banned files.')
+
+    parser.add_argument('--dry_run', help='Display information only. No file will be modified', action='store_true')
     args = vars(parser.parse_args())
+
+    if args['clean'] and args['banned_files_dir'] is None:
+        print("You must provide a directory of banned files to run a cleaning!")
+        return
 
     #The library will be cleaned
     if args['clean']:
@@ -154,7 +160,7 @@ def main():
     global dry_run
     dry_run = args['dry_run']
 
-    if not os.path.isdir(args['directory']) or not os.path.exists(args['directory']):
+    if not os.path.isdir(args['library_path']) or not os.path.exists(args['library_path']):
         print("You must provide a valid directory to look into!")
         sys.exit(-1)
 
@@ -164,7 +170,7 @@ def main():
 
     # First lets recursively find all the comics in the library 
     comics = []
-    for root, dirnames, filenames in os.walk(args['directory']):
+    for root, dirnames, filenames in os.walk(args['library_path']):
         for filename in fnmatch.filter(filenames, '*.cb?'):
             comics.append(os.path.join(root, filename))
 
