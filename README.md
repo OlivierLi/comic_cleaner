@@ -26,5 +26,9 @@ ComicCleaner then scans your library again and when it encounters one of these b
 **--dry_run**  
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Display information only. No file will be modified
 
+## Dependencies:
+ComicCleaner uses  [rarfile](https://pypi.python.org/pypi/rarfile/2.2).  
+You can install it using : <code>sudo pip install rarfile</code>
+
 ###Disclaimer : 
 ComicCleaner is for use with comics you scanned yourself or acquired by legal means. I do not condone piracy in any way.
