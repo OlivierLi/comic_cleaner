@@ -137,9 +137,6 @@ def is_comic_valid(comic_path):
 
 
 def main():
-    #Wether or not to clean the library
-    do_clean = False
-
     parser = argparse.ArgumentParser(description="ComicCleaner cleans your comic library for you.")
     parser.add_argument('library_path', help='The location of your library')
 
@@ -152,10 +149,6 @@ def main():
     if args['clean'] and args['banned_files_dir'] is None:
         print("You must provide a directory of banned files to run a cleaning!")
         return
-
-    #The library will be cleaned
-    if args['clean']:
-        do_clean = True
 
     global dry_run
     dry_run = args['dry_run']
@@ -180,7 +173,7 @@ def main():
             comics.remove(comic)
 
     #There is no cleaning up to, bail out
-    if not do_clean:
+    if not args['clean']:
         return
 
     #Now that invalid archive are excluded we can proceed with cleaning them
