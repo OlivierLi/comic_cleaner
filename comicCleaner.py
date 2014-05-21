@@ -28,8 +28,8 @@ def gather_crcs(directory):
         for filneame in filenames:
             full_path = os.path.abspath(os.path.join(dirpath, filneame))
 
-            buffer = open(full_path, 'rb').read()
-            crc_value = binascii.crc32(buffer)
+            my_buffer = open(full_path, 'rb').read()
+            crc_value = binascii.crc32(my_buffer)
 
             crcs.append(crc_value)
 
@@ -89,9 +89,9 @@ def clean_comic(comic_path):
             if isinstance(info, rarfile.RarInfo) and info.isdir():
                 pass
             else:
-                buffer = archive.read(info.filename)
+                my_buffer = archive.read(info.filename)
                 if info.CRC not in crcs_to_remove:
-                    zip_file_out.writestr(info.filename, buffer)
+                    zip_file_out.writestr(info.filename, my_buffer)
 
 
 def is_comic_valid(comic_path):
@@ -159,8 +159,7 @@ def main():
 
     #Lets find the crcs of the banned images
     global banned_crcs
-    if args['clean']:
-        banned_crcs = gather_crcs("pages_to_remove")
+    banned_crcs = gather_crcs("pages_to_remove")
 
     # First lets recursively find all the comics in the library 
     comics = []
