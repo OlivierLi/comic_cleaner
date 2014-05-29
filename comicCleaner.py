@@ -159,7 +159,8 @@ def main():
 
     #Lets find the crcs of the banned images
     global banned_crcs
-    banned_crcs = gather_crcs("pages_to_remove")
+    if args['clean']:
+        banned_crcs = gather_crcs("pages_to_remove")
 
     # First lets recursively find all the comics in the library 
     comics = []
