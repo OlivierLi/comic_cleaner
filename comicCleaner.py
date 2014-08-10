@@ -1,5 +1,4 @@
-#!/usr/bin/python3
-
+#!/usr/bin/python3 
 import sys
 import os
 import fnmatch
@@ -139,10 +138,8 @@ def is_comic_valid(comic_path):
 def main():
     parser = argparse.ArgumentParser(description="ComicCleaner cleans your comic library for you.")
     parser.add_argument('library_path', help='The location of your library')
-
-    parser.add_argument('--clean', help='Remove banned files from the comics', action='store_true')
     parser.add_argument('--banned_files_dir', help='The directory contaning the banned files.')
-
+    parser.add_argument('--clean', help='Remove banned files from the comics', action='store_true')
     parser.add_argument('--dry_run', help='Display information only. No file will be modified', action='store_true')
     args = vars(parser.parse_args())
 
@@ -158,8 +155,9 @@ def main():
         sys.exit(-1)
 
     #Lets find the crcs of the banned images
-    global banned_crcs
-    banned_crcs = gather_crcs("pages_to_remove")
+    if args['banned_files_dir']:
+        global banned_crcs
+        banned_crcs = gather_crcs(args['banned_files_dir'])
 
     # First lets recursively find all the comics in the library 
     comics = []
