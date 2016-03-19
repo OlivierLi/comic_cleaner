@@ -8,14 +8,14 @@ import binascii
 import shutil
 import argparse
 
-#When a file with this crc is encountered it will be removed from the archive
+# When a file with this crc is encountered it will be removed from the archive
 banned_crcs = []
 
-#If dry_run is selected then no files will be modified
+# If dry_run is selected then no files will be modified
 dry_run = False
 
 
-#Go over the directory and gather the crcs of the files inside
+# Go over the directory and gather the crcs of the files inside
 def gather_crcs(directory):
     if not os.path.isdir(directory) or not os.path.exists(directory):
         print("The ad directory is invalid!")
@@ -35,8 +35,8 @@ def gather_crcs(directory):
     return crcs
 
 
-#Go over the archive and find out if some of its file are banned
-#If there are banned files remove them from the archive
+# Go over the archive and find out if some of its file are banned
+# If there are banned files remove them from the archive
 def clean_comic(comic_path):
     global banned_crcs
     global dry_run
@@ -51,28 +51,28 @@ def clean_comic(comic_path):
 
     page_info_list = archive.infolist()
 
-    #The crcs of all the files that have to be removed from the archive
+    # The crcs of all the files that have to be removed from the archive
     crcs_to_remove = []
 
-    #Go over the file and find out if files have to be removed
+    # Go over the file and find out if files have to be removed
     for info in page_info_list:
         for banned_crc in banned_crcs:
             if info.CRC == banned_crc:
                 crcs_to_remove.append(info.CRC)
                 print("Banned page (based on its CRC) found in :" + comic_path)
 
-    #We are running a dry run so don't modify any files!
+    # We are running a dry run so don't modify any files!
     if dry_run:
         return
 
-    #Some files have to be removed
+    # Some files have to be removed
     if len(crcs_to_remove) > 0:
 
-        #Create a backup of the file
+        # Create a backup of the file
         new_path = comic_path[0:-3] + "bak"
         shutil.move(comic_path, new_path)
 
-        #Recreate the rar file from the new path
+        # Recreate the rar file from the new path
         if fnmatch.fnmatchcase(comic_path, "*.cbz"):
             archive = zipfile.ZipFile(new_path)
         elif fnmatch.fnmatchcase(comic_path, "*.cbr"):
@@ -80,10 +80,10 @@ def clean_comic(comic_path):
 
         page_info_list = archive.infolist()
 
-        #Only the creation of zips is suported
+        # Only the creation of zips is supported
         zip_file_out = zipfile.ZipFile(comic_path[0:-3] + "cbz", 'w')
 
-        #Only rarfiles have a problem with extracting a directory
+        # Only rar files have a problem with extracting a directory
         for info in page_info_list:
             if isinstance(info, rarfile.RarInfo) and info.isdir():
                 pass
@@ -112,7 +112,7 @@ def is_comic_valid(comic_path):
             print(comic_path + " is invalid because it has no pages.")
             return False
 
-        #See if each page is a single or double page based on the size
+        # See if each page is a single or double page based on the size
         for info in page_info_list:
             if info.file_size < cover_size * 1.5:
                 number_of_files += 1
@@ -138,7 +138,7 @@ def is_comic_valid(comic_path):
 def main():
     parser = argparse.ArgumentParser(description="ComicCleaner cleans your comic library for you.")
     parser.add_argument('library_path', help='The location of your library')
-    parser.add_argument('--banned_files_dir', help='The directory contaning the banned files.')
+    parser.add_argument('--banned_files_dir', help='The directory containing the banned files.')
     parser.add_argument('--clean', help='Remove banned files from the comics', action='store_true')
     parser.add_argument('--dry_run', help='Display information only. No file will be modified', action='store_true')
     args = vars(parser.parse_args())
@@ -154,7 +154,7 @@ def main():
         print("You must provide a valid directory to look into!")
         sys.exit(-1)
 
-    #Lets find the crcs of the banned images
+    # Lets find the crcs of the banned images
     if args['banned_files_dir']:
         global banned_crcs
         banned_crcs = gather_crcs(args['banned_files_dir'])
@@ -170,11 +170,11 @@ def main():
         if not is_comic_valid(comic):
             comics.remove(comic)
 
-    #There is no cleaning up to, bail out
+    # There is no cleaning up to, bail out
     if not args['clean']:
         return
 
-    #Now that invalid archive are excluded we can proceed with cleaning them
+    # Now that invalid archive are excluded we can proceed with cleaning them
     for comic in comics:
         clean_comic(comic)
 
