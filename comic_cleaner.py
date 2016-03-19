@@ -150,7 +150,7 @@ def clean_library(library_path, banned_files_dir=None, dry_run=True ):
 
 
 def main():
-    parser = argparse.ArgumentParser(description="ComicCleaner cleans your comic library for you.")
+    parser = argparse.ArgumentParser(description="comic_cleaner cleans your comic library for you.")
     parser.add_argument("library_path", help="The location of your library")
     parser.add_argument("--banned_files_dir", help="The directory containing the banned files.")
     parser.add_argument("--dry_run", help="Display information only. No file will be modified", action="store_true")
